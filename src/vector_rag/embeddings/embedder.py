@@ -105,7 +105,10 @@ class SentenceTransformerEmbedder(BaseEmbedder):
                     self.model_name,
                     device=self.device,
                 )
-                self._dim = self._model.get_sentence_embedding_dimension()
+                if hasattr(self._model, "get_embedding_dimension"):
+                    self._dim = self._model.get_embedding_dimension()
+                else:
+                    self._dim = self._model.get_sentence_embedding_dimension()
                 logger.info("Loaded embedding model '%s' with dimension=%d", self.model_name, self._dim)
             except Exception as e:
                 raise EmbeddingError(

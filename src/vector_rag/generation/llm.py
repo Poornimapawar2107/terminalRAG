@@ -41,10 +41,10 @@ class HuggingFaceLLM(BaseLLM):
     """
 
     DEFAULT_SYSTEM_PROMPT = (
-        "You are an expert technical assistant. Answer the user's question accurately and "
-        "concisely using ONLY the provided context sources. Whenever you state a fact derived "
-        "from a source, cite the source number using brackets, e.g. [1] or [2]. "
-        "If the context does not contain the answer, state that the information is unavailable."
+        "You are an expert technical assistant. Answer the user's question accurately using ONLY the provided reference sources.\n"
+        "Crucial Citation Rule: Every single statement of fact MUST include a citation tag referencing the source number, like [1] or [2].\n"
+        "Example: PostgreSQL uses Multi-Version Concurrency Control (MVCC) to handle transactions [1]. Each tuple stores xmin and xmax identifiers [1].\n"
+        "If the context does not contain the answer, state that the information is unavailable in the reference sources."
     )
 
     def __init__(

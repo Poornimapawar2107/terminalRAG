@@ -17,9 +17,12 @@ class RAGService:
     """End-to-End Vector RAG pipeline orchestrator."""
 
     DEFAULT_PROMPT_TEMPLATE = (
-        "Answer the question based strictly on the following context sources:\n\n"
+        "Reference Sources:\n"
         "{context}\n\n"
-        "Question: {query}\n\n"
+        "User Question: {query}\n\n"
+        "Instructions:\n"
+        "1. Answer the question directly using facts from the reference sources above.\n"
+        "2. You MUST cite the source number in brackets like [1] or [2] whenever mentioning details from [Source 1], [Source 2], etc.\n\n"
         "Answer with citations:"
     )
 
