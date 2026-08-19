@@ -6,7 +6,6 @@
   <img src="https://img.shields.io/badge/HuggingFace-Transformers-yellow?style=for-the-badge&logo=huggingface&logoColor=white" alt="Transformers"/>
   <img src="https://img.shields.io/badge/PyTest-79%20Passed-brightgreen?style=for-the-badge&logo=pytest&logoColor=white" alt="PyTest"/>
   <img src="https://img.shields.io/badge/License-MIT-purple?style=for-the-badge" alt="License"/>
-  <img src="https://img.shields.io/badge/Colab-Ready-orange?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Google Colab"/>
 </p>
 
 ---
