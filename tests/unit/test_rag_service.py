@@ -1,6 +1,6 @@
 """Unit tests for RAGService orchestration logic."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 import pytest
 from vector_rag.generation.citation import CitationExtractor
 from vector_rag.generation.context import ContextBuilder
@@ -8,6 +8,7 @@ from vector_rag.generation.llm import MockLLM
 from vector_rag.generation.rag_service import RAGService
 from vector_rag.models.retrieval import RerankedChunk, RetrievedChunk
 from vector_rag.retrieval.service import RetrievalService
+from vector_rag.utils.errors import GenerationError
 
 
 def _make_mock_retrieval_service(candidates, reranked):
@@ -18,6 +19,17 @@ def _make_mock_retrieval_service(candidates, reranked):
     result.reranked = reranked
     mock_service.search_and_rerank.return_value = result
     return mock_service
+
+
+def _make_retrieved(idx, filename, page, text, score=0.85):
+    return RetrievedChunk(
+        chunk_id=f"chk-{idx}",
+        document_id=f"doc-{idx}",
+        filename=filename,
+        text=text,
+        score=score,
+        page=page,
+    )
 
 
 def _make_reranked(idx, filename, page, text):
@@ -34,12 +46,14 @@ def _make_reranked(idx, filename, page, text):
 
 def test_rag_query_returns_answer_with_citations():
     """Full pipeline with mock components returns answer and resolved citations."""
-    c1 = _make_reranked(1, "linux.pdf", 42, "Inodes store metadata like permissions.")
-    c2 = _make_reranked(2, "fs.pdf", 10, "Superblocks define filesystem geometry.")
+    r1 = _make_retrieved(1, "linux.pdf", 42, "Inodes store metadata like permissions.")
+    r2 = _make_retrieved(2, "fs.pdf", 10, "Superblocks define filesystem geometry.")
+    rr1 = _make_reranked(1, "linux.pdf", 42, "Inodes store metadata like permissions.")
+    rr2 = _make_reranked(2, "fs.pdf", 10, "Superblocks define filesystem geometry.")
 
     retrieval_svc = _make_mock_retrieval_service(
-        candidates=[c1, c2],
-        reranked=[c1, c2],
+        candidates=[r1, r2],
+        reranked=[rr1, rr2],
     )
     llm = MockLLM(
         default_response="Inodes store metadata [1] and superblocks manage geometry [2]."
@@ -83,9 +97,9 @@ def test_rag_query_no_results():
 
 def test_rag_query_uses_candidates_when_no_reranked():
     """When reranking returns empty but candidates exist, candidates are used."""
-    c1 = _make_reranked(1, "data.txt", 1, "Some data about algorithms.")
+    r1 = _make_retrieved(1, "data.txt", 1, "Some data about algorithms.")
     retrieval_svc = _make_mock_retrieval_service(
-        candidates=[c1],
+        candidates=[r1],
         reranked=[],
     )
     llm = MockLLM(default_response="Algorithms handle sorting [1].")
@@ -101,15 +115,14 @@ def test_rag_query_uses_candidates_when_no_reranked():
 
     assert len(response.answer) > 0
     assert "[1]" in response.answer
-    assert response.retrieved_chunks == [c1]
+    assert response.retrieved_chunks == [r1]
 
 
 def test_rag_query_llm_error_propagates():
     """When the LLM raises an error, it propagates through RAGService."""
-    from vector_rag.utils.errors import GenerationError
-
-    c1 = _make_reranked(1, "test.txt", 1, "Test content.")
-    retrieval_svc = _make_mock_retrieval_service(candidates=[c1], reranked=[c1])
+    r1 = _make_retrieved(1, "test.txt", 1, "Test content.")
+    rr1 = _make_reranked(1, "test.txt", 1, "Test content.")
+    retrieval_svc = _make_mock_retrieval_service(candidates=[r1], reranked=[rr1])
 
     error_llm = MagicMock(spec=MockLLM)
     error_llm.generate.side_effect = GenerationError("LLM crashed")
