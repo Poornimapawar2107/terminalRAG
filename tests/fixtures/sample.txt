@@ -1,0 +1,5 @@
+Operating System Concepts: Filesystems and Inodes
+
+In Unix and Linux filesystems, an inode (index node) is a data structure that stores metadata about a file or directory. 
+The inode contains attributes such as file size, owner user ID, group ID, file permissions, creation, modification, and access timestamps.
+Crucially, the inode does not store the actual file content or the file name. The file name is mapped to the inode number inside a directory entry.
